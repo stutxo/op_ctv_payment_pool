@@ -123,8 +123,5 @@ fn main() -> Result<()> {
         )?;
     }
 
-    //if we were using anchor outputs, we would make child transactions to spend all the parent txids.
-    //examples can be found here https://github.com/stutxo/simple_ctv/blob/6f564a002fbd95a9ae60e279c99658bedecc96ba/src/main.rs#L132
-
     Ok(())
 }
