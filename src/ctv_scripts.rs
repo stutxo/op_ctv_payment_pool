@@ -58,7 +58,7 @@ pub fn create_pool_address(ctv_hashes: Vec<[u8; 32]>) -> Result<TaprootSpendInfo
     let key_pair = Keypair::new(&secp, &mut rand::thread_rng());
     //TO DO: replace this with a MuSig key for happy spend :)
     // Random unspendable XOnlyPublicKey provided for internal key. Will replace this with combination of all pool users pubkeys (MuSig)
-    //in a real implentation we would most likely use nostr to communicate the funding PSBT, so you could also user their npubs to create the MuSig key
+    //in a real implentation we would most likely use nostr to communicate the funding PSBT, so you could also use their npubs to create the MuSig key
     let (unspendable_pubkey, _parity) = XOnlyPublicKey::from_keypair(&key_pair);
 
     let num_scripts = ctv_hashes.len();

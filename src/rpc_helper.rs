@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::Result;
-use bitcoin::{consensus::serialize, hex, Address, Amount, TxOut, Txid};
+use bitcoin::{Address, Txid};
 use bitcoincore_rpc::{
     json::{self, GetTransactionResultDetail},
     jsonrpc::serde_json,

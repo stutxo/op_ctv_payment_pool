@@ -110,3 +110,9 @@ https://rubin.io/bitcoin/2021/12/15/advent-18/
 greg maxwell on IRC
 
 https://freenode.irclog.whitequark.org/bitcoin-wizards/2019-05-21#24639752
+
+coinpools
+
+https://discrete-blog.github.io/coinpool/
+
+https://gnusha.org/pi/bitcoindev/CALZpt+FqAWCAqCLF2HsajL84sOvst_X9_34bb_tvUxLFw=HTAA@mail.gmail.com/
