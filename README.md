@@ -15,11 +15,13 @@ txn only requires one signature to make a batched payment from a group. Payment 
 coinjoin automatically5, giving you great privacy.
 ```
 
-You can test spending any size pool by changing the following const. I got it to work with 21, but it took a very long time (43 mins, lol) to create all the different taproot spend combinations. It will spend in order of addresses added, just to keep it simple for the proof-of-concept.
+You can test spending any size pool by changing the following const.
 
 ```rust
-const POOL_USERS: usize = 10;
+const POOL_USERS: usize = 4;
 ```
+
+I got it to work with 21, but it took a very long time (43 mins, lol) to create all the different taproot spend combinations. It will spend in order of addresses added, just to keep it simple for the proof-of-concept.
 
 I dont think i can create a big enough diagram for the 21 user pool so i will just show this 4 person pool
 
