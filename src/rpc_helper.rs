@@ -11,7 +11,7 @@ use serde_json::json;
 use tracing::info;
 
 use crate::{
-    config::{NetworkConfig, INIT_WALLET_AMOUNT},
+    config::{NetworkConfig, DEFAULT_FEE_RATE, INIT_WALLET_AMOUNT},
     AMOUNT_PER_USER, POOL_USERS,
 };
 
@@ -64,7 +64,11 @@ pub fn simulate_psbt_signing(
 
     let estimated_tx_size = (num_users * input_size) + (num_outputs * output_size) + fixed_overhead;
 
-    let fee_rate = rpc.estimate_smart_fee(1, None)?.fee_rate.unwrap().to_sat();
+    let fee_rate = rpc
+        .estimate_smart_fee(1, None)
+        .ok()
+        .and_then(|estimate| estimate.fee_rate.map(|rate| rate.to_sat()))
+        .unwrap_or(DEFAULT_FEE_RATE);
     let total_fee = fee_rate * estimated_tx_size / 1000;
     let fee_per_user = total_fee / num_users;
 

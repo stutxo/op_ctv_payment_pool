@@ -11,7 +11,7 @@ use itertools::Itertools;
 use tracing::info;
 
 use crate::{
-    config::{NetworkConfig, FEE_AMOUNT, TX_VERSION},
+    config::{NetworkConfig, DEFAULT_FEE_RATE, FEE_AMOUNT, TX_VERSION},
     ctv_scripts::{create_pool_address, create_withdraw_ctv_hash, spend_ctv},
     AMOUNT_PER_USER, POOL_USERS,
 };
@@ -345,10 +345,10 @@ pub fn cpfp_tx(rpc: &Client, parent_txid: Txid) {
 
     let fee_rate = rpc
         .estimate_smart_fee(1, None)
-        .unwrap()
-        .fee_rate
-        .unwrap()
-        .to_sat();
+        .ok()
+        .and_then(|estimate| estimate.fee_rate.map(|rate| rate.to_sat()))
+        .unwrap_or(DEFAULT_FEE_RATE);
+
     let total_fee = fee_rate * estimated_tx_size / 1000;
 
     let unspent = rpc.list_unspent(Some(1), None, None, None, None).unwrap();
