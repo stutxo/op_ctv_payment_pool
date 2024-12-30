@@ -36,8 +36,6 @@ pub fn send_funding_transaction(rpc: &Client, config: &NetworkConfig) -> bitcoin
     let minconf = 1;
     let comment = "Fund init user wallets";
 
-    info!("amounts: {:?} \n", amounts);
-
     let txid: String = rpc
         .call(
             "sendmany",
