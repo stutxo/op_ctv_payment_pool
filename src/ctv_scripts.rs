@@ -15,6 +15,7 @@ use crate::{
     AMOUNT_PER_USER,
 };
 
+// OP_SECURETHRBAG is the second name for OP_CHECKTEMPLATEVERIFY. OP_NOP4 is the spare opcode that will be used for op_ctv cos of softfork reasons 
 const OP_SECURETHEBAG: Opcode = OP_NOP4;
 
 pub fn ctv_script(ctv_hash: [u8; 32]) -> ScriptBuf {
