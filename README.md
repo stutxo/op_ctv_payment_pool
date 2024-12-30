@@ -111,7 +111,7 @@ greg maxwell on IRC
 
 https://freenode.irclog.whitequark.org/bitcoin-wizards/2019-05-21#24639752
 
-coinpools
+Coinpools
 
 https://discrete-blog.github.io/coinpool/
 

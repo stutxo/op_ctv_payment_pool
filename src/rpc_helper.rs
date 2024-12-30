@@ -96,10 +96,12 @@ pub fn simulate_psbt_signing(
         let change_address = rpc.get_raw_change_address(None).unwrap();
 
         if output.amount.to_unsigned().unwrap()
-            < AMOUNT_PER_USER + bitcoin::Amount::from_sat(fee_per_user)
+            < AMOUNT_PER_USER
+                + bitcoin::Amount::from_sat(fee_per_user)
+                + bitcoin::Amount::from_sat(546)
         {
             panic!(
-                "insufficient funds, amount in output{}, fee:{}, increae amount in INIT_WALLET_AMOUNT const",
+                "insufficient funds, amount in output{}, fee:{}, increase amount in INIT_WALLET_AMOUNT const",
                 output.amount.to_sat(), (bitcoin::Amount::from_sat(fee_per_user) + AMOUNT_PER_USER).to_sat()
             );
         }
