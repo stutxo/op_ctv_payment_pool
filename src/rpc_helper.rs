@@ -26,15 +26,17 @@ pub fn send_funding_transaction(rpc: &Client, config: &NetworkConfig) -> bitcoin
         .collect();
 
     let mut amounts = serde_json::Map::new();
+    let total_btc = AMOUNT_PER_USER.to_btc() + INIT_WALLET_AMOUNT.to_btc();
+    let total_btc_str = format!("{:.8}", total_btc);
+
     for address in addresses {
-        amounts.insert(
-            address.to_string(),
-            json!(AMOUNT_PER_USER.to_btc() + INIT_WALLET_AMOUNT.to_btc()),
-        );
+        amounts.insert(address.to_string(), json!(total_btc_str));
     }
 
     let minconf = 1;
     let comment = "Fund init user wallets";
+
+    info!("amounts: {:?} \n", amounts);
 
     let txid: String = rpc
         .call(

@@ -13,7 +13,7 @@ use tracing::info;
 //this could be 240 for P2A but we set for 1000 for now so it works on signet with hard coded fee
 pub const FEE_AMOUNT: Amount = Amount::from_sat(1000);
 //send a bit more so we can cover the fees for the pool funding transaction
-pub const INIT_WALLET_AMOUNT: Amount = Amount::from_sat(1000);
+pub const INIT_WALLET_AMOUNT: Amount = Amount::from_sat(2000);
 pub const DEFAULT_FEE_RATE: u64 = 5000;
 
 //must be 3 or more. You can do maybe up to 20, but it will take a very long time to compute all taproot addresses
