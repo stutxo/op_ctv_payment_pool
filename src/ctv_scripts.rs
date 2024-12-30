@@ -15,7 +15,9 @@ use crate::{
     AMOUNT_PER_USER,
 };
 
-// OP_SECURETHRBAG is the second name for OP_CHECKTEMPLATEVERIFY. OP_NOP4 is the spare opcode that will be used for op_ctv cos of softfork reasons 
+// OP_SECURETHEBAG is the original name (well there was another name before this but thats deep lore) for OP_CHECKTEMPLATEVERIFY. 
+// OP_NOP4 is the spare opcode that will be used for op_ctv cos of softfork reasons 
+// https://github.com/bitcoin/bips/blob/master/bip-0119.mediawiki
 const OP_SECURETHEBAG: Opcode = OP_NOP4;
 
 pub fn ctv_script(ctv_hash: [u8; 32]) -> ScriptBuf {
