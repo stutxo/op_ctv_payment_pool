@@ -47,6 +47,14 @@ last two users exit https://mempool.space/signet/tx/ae01341817cf3bb7c04e7f02f0bd
 
 ![alt text](image-4.png)
 
+## Example transactions for 21 person pool
+
+You can follow the flow of exits from the first funding transaction to the last exit transaction
+
+funding pool tx https://mempool.space/signet/tx/9355750f995d1ea9a7af21f9bbee912ac96e351b065e980b15b746ef3a555560
+
+final exit of pool tx https://mempool.space/signet/tx/0a488d0d646e8c9ebf7a16de338ad2ab830de2f66c21c543114c201133f363ef
+
 
 ## Example transactions for 10 person pool
 

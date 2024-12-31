@@ -15,7 +15,8 @@ mod ctv_scripts;
 mod pools;
 mod rpc_helper;
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     tracing_subscriber::fmt().with_target(false).init();
 
     if POOL_USERS < 3 {
