@@ -1,7 +1,7 @@
 use anyhow::Result;
 use bitcoin::Address;
 use bitcoincore_rpc::RpcApi;
-use config::{NetworkConfig, AMOUNT_PER_USER, POOL_USERS};
+use config::{NetworkConfig, AMOUNT_PER_USER, DUST_AMOUNT, FEE_AMOUNT, POOL_USERS};
 use ctv_scripts::create_pool_address;
 use pools::{
     create_all_pools, create_entry_pool_withdraw_hashes, create_exit_pool, process_pool_spend,
@@ -15,12 +15,15 @@ mod ctv_scripts;
 mod pools;
 mod rpc_helper;
 
-#[tokio::main]
-async fn main() -> Result<()> {
+fn main() -> Result<()> {
     tracing_subscriber::fmt().with_target(false).init();
 
     if POOL_USERS < 3 {
         panic!("Pool must have at least 3 users");
+    }
+
+    if AMOUNT_PER_USER <= FEE_AMOUNT + DUST_AMOUNT {
+        panic!("Amount per user must be more than the FEE_AMOUNT const");
     }
 
     let config = NetworkConfig::new();
