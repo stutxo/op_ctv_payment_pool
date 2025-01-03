@@ -23,7 +23,7 @@ fn main() -> Result<()> {
     }
 
     if AMOUNT_PER_USER <= FEE_AMOUNT + DUST_AMOUNT {
-        panic!("Amount per user must be more than the FEE_AMOUNT const");
+        panic!("Amount per user must be more than the FEE_AMOUNT + DUST_AMOUNT const");
     }
 
     let config = NetworkConfig::new();

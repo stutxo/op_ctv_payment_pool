@@ -11,7 +11,7 @@ use serde_json::json;
 use tracing::info;
 
 use crate::{
-    config::{NetworkConfig, DEFAULT_FEE_RATE, DUST_AMOUNT, INIT_WALLET_AMOUNT},
+    config::{NetworkConfig, DEFAULT_FEE_RATE, DUST_AMOUNT, INIT_WALLET_AMOUNT_FEE},
     AMOUNT_PER_USER, POOL_USERS,
 };
 
@@ -26,7 +26,7 @@ pub fn send_funding_transaction(rpc: &Client, config: &NetworkConfig) -> bitcoin
         .collect();
 
     let mut amounts = serde_json::Map::new();
-    let total_btc = AMOUNT_PER_USER.to_btc() + INIT_WALLET_AMOUNT.to_btc();
+    let total_btc = AMOUNT_PER_USER.to_btc() + INIT_WALLET_AMOUNT_FEE.to_btc();
     let total_btc_str = format!("{:.8}", total_btc);
 
     for address in addresses {
@@ -139,7 +139,12 @@ pub fn get_vouts_from_init_tx(rpc: &Client, txid: &Txid) -> Vec<GetTransactionRe
 
     let matched_vouts: Vec<GetTransactionResultDetail> = tx_details
         .iter()
-        .filter(|vout| vout.amount == (AMOUNT_PER_USER + INIT_WALLET_AMOUNT).to_signed().unwrap())
+        .filter(|vout| {
+            vout.amount
+                == (AMOUNT_PER_USER + INIT_WALLET_AMOUNT_FEE)
+                    .to_signed()
+                    .unwrap()
+        })
         .cloned()
         .collect();
 
