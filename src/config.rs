@@ -4,6 +4,7 @@ use bitcoin::{Amount, Network};
 
 use bitcoincore_rpc::{Auth, Client, RpcApi};
 use tracing::info;
+use std::path::PathBuf;
 
 // https://bitcoinops.org/en/bitcoin-core-28-wallet-integration-guide/
 // mainnet: bc1pfeessrawgf
@@ -66,19 +67,23 @@ impl NetworkConfig {
     }
 
     pub fn bitcoin_rpc(&self) -> Client {
-        let bitcoin_rpc_user =
-            env::var("BITCOIN_RPC_USER").expect("BITCOIN_RPC_USER env var not set");
-        let bitcoin_rpc_pass =
-            env::var("BITCOIN_RPC_PASS").expect("BITCOIN_RPC_PASS env var not set");
+        let bitcoin_rpc_cookie_path =
+            env::var("BITCOIN_RPC_COOKIE_PATH").expect("BITCOIN_RPC_COOKIE_PATH env var not set");
+        //let bitcoin_rpc_user =
+            //env::var("BITCOIN_RPC_USER").expect("BITCOIN_RPC_USER env var not set");
+        //let bitcoin_rpc_pass =
+            //env::var("BITCOIN_RPC_PASS").expect("BITCOIN_RPC_PASS env var not set");
 
         let bitcoin_rpc_url =
             format!("http://localhost:{}/wallet/{}", self.port, self.wallet_name,);
 
         info!("wallet name in use: {} \n", self.wallet_name);
 
+        let cookie_path = PathBuf::from(bitcoin_rpc_cookie_path);
+
         let bitcoin_rpc = Client::new(
             &bitcoin_rpc_url,
-            Auth::UserPass(bitcoin_rpc_user, bitcoin_rpc_pass),
+            Auth::CookieFile(cookie_path),
         )
         .unwrap();
 
