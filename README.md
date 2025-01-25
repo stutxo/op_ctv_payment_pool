@@ -87,9 +87,9 @@ const POOL_USERS: usize = 10;
 ```bash
 ./bitcoind -signet -addnode=inquisition.bitcoin-signet.net
 ```
+
 ```bash
-export BITCOIN_RPC_USER="rpc_username"
-export BITCOIN_RPC_PASS="rpc_password"
+export BITCOIN_RPC_COOKIE_PATH="/home/user/.bitcoin/signet/.cookie"
 export SIGNET_WALLET="signet wallet name"
 cargo run --no-default-features --features "signet"
 ```
@@ -101,8 +101,7 @@ in regtest we use P2A and v3 transactions to spend. I had a hard time trying to 
 ./bitcoind -regtest -minrelaytxfee=0 -fallbackfee=0.0001
 ```
 ```bash
-export BITCOIN_RPC_USER="rpc_username"
-export BITCOIN_RPC_PASS="rpc_password"
+export BITCOIN_RPC_COOKIE_PATH="/home/user/.bitcoin/regtest/.cookie"
 cargo run --features "regtest"
 ```
 ### Resources
