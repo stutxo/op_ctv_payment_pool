@@ -1,7 +1,7 @@
 use bitcoin::{Amount, Network};
-use bitcoincore_rpc::{Auth, Client, RpcApi};
+use bitcoincore_rpc::{Auth, Client, Error, RpcApi};
 use std::path::PathBuf;
-use tracing::info;
+use tracing::{error, info};
 
 // https://bitcoinops.org/en/bitcoin-core-28-wallet-integration-guide/
 // mainnet: bc1pfeessrawgf
@@ -67,7 +67,7 @@ impl NetworkConfig {
         std::env::var(var_name).unwrap_or_else(|_| default_value.to_string())
     }
 
-    pub fn bitcoin_rpc(&self) -> Client {
+    pub fn bitcoin_rpc(&self) -> Result<Client, Error> {
         let bitcoin_rpc_user = Self::get_env_var("BITCOIN_RPC_USER", "NA");
         let bitcoin_rpc_pass = Self::get_env_var("BITCOIN_RPC_PASS", "NA");
         let bitcoin_rpc_cookie_path = Self::get_env_var("BITCOIN_RPC_COOKIE_PATH", "NA");
@@ -77,61 +77,58 @@ impl NetworkConfig {
 
         info!("wallet name in use: {} \n", self.wallet_name);
 
-        let bitcoin_rpc_user_clone = bitcoin_rpc_user.clone();
-        let bitcoin_rpc_pass_clone = bitcoin_rpc_pass.clone();
-
-        let auth;
+        //let auth;
         let bitcoin_rpc;
         let test_auth;
 
-        //Check if user/pass or cookie is found in enviroment variables. 
-        //If both are found, UserPass will be used first.
+        //Check if user/pass or cookie is found in enviroment variables.
+        //If both are found, UserPass will be tried first.
         if bitcoin_rpc_user != "NA" || bitcoin_rpc_pass != "NA" {
             test_auth = Auth::UserPass(bitcoin_rpc_user, bitcoin_rpc_pass);
         } else if bitcoin_rpc_cookie_path == "NA" {
-            panic!("No User/Pass or Cookie found!");
+            error!("No User/Pass or Cookie found!");
+            return Err(Error::InvalidCookieFile {});
         } else {
             test_auth = Auth::CookieFile(PathBuf::from(&bitcoin_rpc_cookie_path));
         }
 
-        let test_bitcoin_rpc = Client::new(&bitcoin_rpc_url, test_auth).unwrap();
+        let test_bitcoin_rpc_userpass = Client::new(&bitcoin_rpc_url, test_auth)?;
 
-        //Test UserPass, If it fails, then fall back to CookieFile.
-        match test_bitcoin_rpc.get_best_block_hash() {
-            Ok(value) => {
-                //UserPass test succeeded
-                auth = Auth::UserPass(bitcoin_rpc_user_clone, bitcoin_rpc_pass_clone);
-                value
+        match test_bitcoin_rpc_userpass.get_best_block_hash() {
+            Ok(_) => {
+                //UserPass authentication succeeded
+                bitcoin_rpc = test_bitcoin_rpc_userpass;
             }
-            Err(_) => {
-                let auth_with_cookie = Auth::CookieFile(PathBuf::from(&bitcoin_rpc_cookie_path));
-                info!("UserPass would not authenticate, trying CookieFile now");
-                if bitcoin_rpc_cookie_path == "NA" { 
-                    info!("No CookieFile found!");
-                    panic!()
-                } 
+            Err(e) => {
+                if &bitcoin_rpc_cookie_path == "NA" {
+                    error!("No CookieFile found and UserPass Failed!");
+                    return Err(Error::ReturnedError(e.to_string()));
+                }
 
-                match Client::new(&bitcoin_rpc_url, auth_with_cookie) {
-                    Ok(alternative_bitcoin_rpc) => {
-                        match alternative_bitcoin_rpc.get_best_block_hash() {
-                            Ok(alternative_value) => {
-                                info!("Cookie File is good!");
-                                auth = Auth::CookieFile(PathBuf::from(&bitcoin_rpc_cookie_path));
-                                alternative_value
+                info!("UserPass would not authenticate, trying CookieFile now");
+
+                let _test_bitcoin_rpc_cookiefile = match Client::new(&bitcoin_rpc_url, Auth::CookieFile(PathBuf::from(&bitcoin_rpc_cookie_path)))
+                {
+                    Ok(test_bitcoin_rpc_cookiefile) => {
+                        match test_bitcoin_rpc_cookiefile.get_best_block_hash() {
+                            Ok(_) => {
+                                info!("Cookie File authentication succeeded!");
+                                bitcoin_rpc = test_bitcoin_rpc_cookiefile;
                             }
+
                             Err(e) => {
-                                panic!("Cookie File would not authenticate: {}", e)
+                                error!("{}", e);
+                                return Err(Error::InvalidCookieFile {});
                             }
                         }
                     }
                     Err(e) => {
-                        panic!("Error with User Pass or CookieFile: {}", e)
+                        error!("{}", e);
+                        return Err(Error::InvalidCookieFile {}); 
                     }
-                }
+                };
             }
         };
-
-        bitcoin_rpc = Client::new(&bitcoin_rpc_url, auth).unwrap();
 
         #[cfg(feature = "regtest")]
         let regtest_wallet = bitcoin_rpc.create_wallet(&self.wallet_name, None, None, None, None);
@@ -142,6 +139,6 @@ impl NetworkConfig {
 
         let _ = bitcoin_rpc.load_wallet(&self.wallet_name);
 
-        bitcoin_rpc
+        Ok(bitcoin_rpc)
     }
 }
