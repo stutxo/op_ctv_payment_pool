@@ -101,7 +101,7 @@ impl NetworkConfig {
             }
             Err(e) => {
                 if &bitcoin_rpc_cookie_path == "NA" {
-                    error!("No CookieFile found and UserPass Failed!");
+                    error!("UserPass failed and no cookie file was found!");
                     return Err(Error::ReturnedError(e.to_string()));
                 }
 
@@ -116,8 +116,8 @@ impl NetworkConfig {
                                 bitcoin_rpc = test_bitcoin_rpc_cookiefile;
                             }
 
-                            Err(e) => {
-                                error!("{}", e);
+                            Err(e) => { //Both Userpass and cookie have failed
+                                error!("Cookie File authenication failed!: {}", e); 
                                 return Err(Error::InvalidCookieFile {});
                             }
                         }
