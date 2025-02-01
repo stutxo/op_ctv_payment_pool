@@ -27,7 +27,7 @@ fn main() -> Result<()> {
     }
 
     let config = NetworkConfig::new();
-    let rpc = config.bitcoin_rpc();
+    let rpc = config.bitcoin_rpc()?;
 
     let mining_address = rpc
         .get_new_address(None, None)?
