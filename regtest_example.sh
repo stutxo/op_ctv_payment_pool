@@ -1,5 +1,15 @@
 #!/bin/bash
 
+echo "Pulling the latest Docker image..."
+docker pull ghcr.io/stutxo/bitcoin-inq:latest
+
+if [ $? -eq 0 ]; then
+    echo "Successfully pulled the Docker image."
+else
+    echo "Failed to pull Docker image."
+    exit 1
+fi
+
 check_container_running() {
     docker inspect --format="{{.State.Running}}" $1 2>/dev/null
 }
