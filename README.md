@@ -99,6 +99,13 @@ cargo run --no-default-features --features "signet"
 ### regtest
 
 in regtest we use P2A and v3 transactions to spend. I had a hard time trying to get v3 transactions in to signet reliably, and you have to wait for confirmations so it takes forever to test.
+
+#### Use docker image for regtest
+```bash
+chmod +x regtest_example.sh
+./regtest_example.sh
+```
+
 ```bash
 ./bitcoind -regtest -minrelaytxfee=0 -fallbackfee=0.0001
 ```

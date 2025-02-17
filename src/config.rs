@@ -97,11 +97,11 @@ impl NetworkConfig {
             }
             Err(e) => {
                 if &bitcoin_rpc_cookie_path == "NA" {
-                    error!("UserPass failed and no cookie file was found!");
+                    error!("RPC auth failed and no cookie file was found!");
                     return Err(Error::ReturnedError(e.to_string()));
                 }
 
-                info!("UserPass would not authenticate, trying CookieFile now");
+                info!("RPC auth would not authenticate, trying CookieFile now");
 
                 match Client::new(
                     &bitcoin_rpc_url,
