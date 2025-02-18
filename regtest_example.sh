@@ -49,3 +49,6 @@ export BITCOIN_RPC_USER="ctviscool"
 export BITCOIN_RPC_PASS="ctviscool"
 
 cargo run --features "regtest"
+
+echo
+echo -e "fbbe blockexplorer is running at http://localhost:3003"
