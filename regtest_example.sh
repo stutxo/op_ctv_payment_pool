@@ -10,28 +10,32 @@ else
     exit 1
 fi
 
-check_container_running() {
-    docker inspect --format="{{.State.Running}}" $1 2>/dev/null
-}
-
 CONTAINER_NAME="bitcoin-inquisition-regtest"
 
-if [ "$(check_container_running $CONTAINER_NAME)" == "true" ]; then
-    echo "Docker container $CONTAINER_NAME is already running."
+# Check if the container exists and capture its running state
+container_status=$(docker inspect --format="{{.State.Running}}" $CONTAINER_NAME 2>/dev/null)
+
+if [ $? -eq 0 ]; then
+    # If docker inspect command was successful, check if the container is running
+    if [ "$container_status" == "true" ]; then
+        echo "Docker container $CONTAINER_NAME is already running. No action needed."
+    else
+        echo "Container $CONTAINER_NAME exists but is not running. Starting it now..."
+        docker start $CONTAINER_NAME
+        if [ $? -eq 0 ]; then
+            echo "Docker container started successfully."
+        else
+            echo "Failed to start Docker container."
+            exit 1
+        fi
+    fi
 else
+    echo "Container does not exist. Creating and starting it now..."
     docker run -d \
       --name $CONTAINER_NAME \
       -p 18443:18443 \
-      ghcr.io/stutxo/bitcoin-inq:latest \
-      -regtest \
-      -server \
-      -rpcallowip=0.0.0.0/0 \
-      -rpcbind=0.0.0.0 \
-      -minrelaytxfee=0 \
-      -fallbackfee=0.0001 \
-      -rpcuser=ctviscool \
-      -rpcpassword=ctviscool \
-      -txindex=1
+      -p 3003:3003 \
+      ghcr.io/stutxo/grugpool-regtest:latest
 
     if [ $? -eq 0 ]; then
         echo "Docker container started successfully."

@@ -106,6 +106,12 @@ chmod +x regtest_example.sh
 ./regtest_example.sh
 ```
 
+#### FBBE
+
+The dockerfile contains a block explorer that you can access at http://localhost:3003 to view transactions
+
+https://github.com/RCasatta/fbbe
+
 #### Use your own bitcoin inquisition node
 
 ```bash
