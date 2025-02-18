@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Pulling the latest Docker image..."
-docker pull ghcr.io/stutxo/bitcoin-inq:latest
+docker pull ghcr.io/stutxo/grugpool-regtest:latest
 
 if [ $? -eq 0 ]; then
     echo "Successfully pulled the Docker image."
