@@ -89,6 +89,11 @@ const POOL_USERS: usize = 10;
 ```
 
 ```bash
+bitcoin-cli -signet createwallet ctv_pool
+bitcoin-cli -signet -rpcwallet=ctv_pool getnewaddress
+```
+
+```bash
 export BITCOIN_RPC_COOKIE_PATH="/home/user/.bitcoin/signet/.cookie"
 export BITCOIN_RPC_USER="rpc_username"
 export BITCOIN_RPC_PASS="rpc_password"
