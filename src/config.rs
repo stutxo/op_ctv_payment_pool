@@ -17,7 +17,7 @@ pub const DEFAULT_FEE_RATE: u64 = 5000;
 pub const INIT_WALLET_AMOUNT_FEE: Amount = Amount::from_sat(2000);
 
 //must be 3 or more. You can do maybe up to 20, but it will take a very long time to compute all taproot addresses
-pub const POOL_USERS: usize = 3;
+pub const POOL_USERS: usize = 10;
 
 //has to be more than FEE_AMOUNT + DUST_AMOUNT
 pub const AMOUNT_PER_USER: Amount = Amount::from_sat(11000);
