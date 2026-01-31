@@ -8,6 +8,7 @@ use bitcoin::{
 };
 use bitcoincore_rpc::{Client, RpcApi};
 use itertools::Itertools;
+use rayon::prelude::*;
 use tracing::info;
 
 use crate::{
@@ -44,8 +45,10 @@ pub fn create_exit_pool(
     addresses: &[Address],
     anchor_addr: &Address,
 ) -> Result<HashMap<Vec<usize>, TaprootSpendInfo>> {
-    let exit_pool: Result<HashMap<Vec<usize>, TaprootSpendInfo>> = (0..POOL_USERS)
-        .combinations(2)
+    let combinations: Vec<_> = (0..POOL_USERS).combinations(2).collect();
+    
+    let exit_pool: Result<HashMap<Vec<usize>, TaprootSpendInfo>> = combinations
+        .into_par_iter()
         .map(|mut combo| {
             combo.sort();
             let i = combo[0];

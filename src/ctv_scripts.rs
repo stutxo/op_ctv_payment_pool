@@ -1,14 +1,16 @@
 use bitcoin::{
     consensus::Encodable,
     hashes::{sha256, Hash},
-    key::{Keypair, Secp256k1},
+    key::Secp256k1,
     opcodes::all::OP_NOP4,
     script::Builder,
+    secp256k1::All,
     taproot::{LeafVersion, TaprootBuilder, TaprootSpendInfo},
     Address, Amount, Opcode, ScriptBuf, Sequence, Transaction, TxOut, XOnlyPublicKey,
 };
 
 use anyhow::Result;
+use once_cell::sync::Lazy;
 
 use crate::{
     config::{FEE_AMOUNT, TX_VERSION},
@@ -19,6 +21,17 @@ use crate::{
 // OP_NOP4 is the spare opcode that will be used for op_ctv cos of softfork reasons
 // https://github.com/bitcoin/bips/blob/master/bip-0119.mediawiki
 const OP_SECURETHEBAG: Opcode = OP_NOP4;
+
+pub static SECP: Lazy<Secp256k1<All>> = Lazy::new(Secp256k1::new);
+
+pub static UNSPENDABLE_PUBKEY: Lazy<XOnlyPublicKey> = Lazy::new(|| {
+    let nums_bytes: [u8; 32] = [
+        0x50, 0x92, 0x9b, 0x74, 0xc1, 0xa0, 0x49, 0x54, 0xb7, 0x8b, 0x4b, 0x60, 0x35, 0xe9, 0x7a,
+        0x5e, 0x07, 0x8a, 0x5a, 0x0f, 0x28, 0xec, 0x96, 0xd5, 0x47, 0xbf, 0xee, 0x9a, 0xce, 0x80,
+        0x3a, 0xc0,
+    ];
+    XOnlyPublicKey::from_slice(&nums_bytes).expect("Valid NUMS point")
+});
 
 pub fn ctv_script(ctv_hash: [u8; 32]) -> ScriptBuf {
     Builder::new()
@@ -56,13 +69,9 @@ pub fn calc_ctv_hash(outputs: &[TxOut], timeout: Option<u32>) -> [u8; 32] {
 }
 
 pub fn create_pool_address(ctv_hashes: Vec<[u8; 32]>) -> Result<TaprootSpendInfo> {
-    let secp = Secp256k1::new();
 
-    let key_pair = Keypair::new(&secp, &mut rand::thread_rng());
-    //TO DO: replace this with a MuSig key for happy spend :)
-    // Random unspendable XOnlyPublicKey provided for internal key. Will replace this with combination of all pool users pubkeys (MuSig)
-    //in a real implentation we would most likely use nostr to communicate the funding PSBT, so you could also use their npubs to create the MuSig key
-    let (unspendable_pubkey, _parity) = XOnlyPublicKey::from_keypair(&key_pair);
+    let secp = &*SECP;
+    let unspendable_pubkey = *UNSPENDABLE_PUBKEY;
 
     let num_scripts = ctv_hashes.len();
     let depths = calculate_depths(num_scripts);
