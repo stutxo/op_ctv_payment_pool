@@ -25,13 +25,23 @@ const OP_SECURETHEBAG: Opcode = OP_NOP4;
 pub static SECP: Lazy<Secp256k1<All>> = Lazy::new(Secp256k1::new);
 
 pub static UNSPENDABLE_PUBKEY: Lazy<XOnlyPublicKey> = Lazy::new(|| {
-    let nums_bytes: [u8; 32] = [
-        0x50, 0x92, 0x9b, 0x74, 0xc1, 0xa0, 0x49, 0x54, 0xb7, 0x8b, 0x4b, 0x60, 0x35, 0xe9, 0x7a,
-        0x5e, 0x07, 0x8a, 0x5a, 0x0f, 0x28, 0xec, 0x96, 0xd5, 0x47, 0xbf, 0xee, 0x9a, 0xce, 0x80,
-        0x3a, 0xc0,
-    ];
-    XOnlyPublicKey::from_slice(&nums_bytes).expect("Valid NUMS point")
+    let pool_nums = nums_from_tag(b"ctv_pool");
+    pool_nums
 });
+
+fn nums_from_tag(tag: &[u8]) -> XOnlyPublicKey {
+    let mut ctr = 0u32;
+    loop {
+        let mut eng = sha256::Hash::engine();
+        eng.input(tag);
+        eng.input(&ctr.to_le_bytes());
+        let candidate = sha256::Hash::from_engine(eng);
+        if let Ok(pk) = XOnlyPublicKey::from_slice(&candidate[..]) {
+            return pk;
+        }
+        ctr += 1;
+    }
+}
 
 pub fn ctv_script(ctv_hash: [u8; 32]) -> ScriptBuf {
     Builder::new()
