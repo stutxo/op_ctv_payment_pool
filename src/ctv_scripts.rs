@@ -1,14 +1,16 @@
 use bitcoin::{
     consensus::Encodable,
     hashes::{sha256, Hash},
-    key::{Keypair, Secp256k1},
+    key::Secp256k1,
     opcodes::all::OP_NOP4,
     script::Builder,
+    secp256k1::All,
     taproot::{LeafVersion, TaprootBuilder, TaprootSpendInfo},
     Address, Amount, Opcode, ScriptBuf, Sequence, Transaction, TxOut, XOnlyPublicKey,
 };
 
 use anyhow::Result;
+use once_cell::sync::Lazy;
 
 use crate::{
     config::{FEE_AMOUNT, TX_VERSION},
@@ -19,6 +21,27 @@ use crate::{
 // OP_NOP4 is the spare opcode that will be used for op_ctv cos of softfork reasons
 // https://github.com/bitcoin/bips/blob/master/bip-0119.mediawiki
 const OP_SECURETHEBAG: Opcode = OP_NOP4;
+
+pub static SECP: Lazy<Secp256k1<All>> = Lazy::new(Secp256k1::new);
+
+pub static UNSPENDABLE_PUBKEY: Lazy<XOnlyPublicKey> = Lazy::new(|| {
+    let pool_nums = nums_from_tag(b"ctv_pool");
+    pool_nums
+});
+
+fn nums_from_tag(tag: &[u8]) -> XOnlyPublicKey {
+    let mut ctr = 0u32;
+    loop {
+        let mut eng = sha256::Hash::engine();
+        eng.input(tag);
+        eng.input(&ctr.to_le_bytes());
+        let candidate = sha256::Hash::from_engine(eng);
+        if let Ok(pk) = XOnlyPublicKey::from_slice(&candidate[..]) {
+            return pk;
+        }
+        ctr += 1;
+    }
+}
 
 pub fn ctv_script(ctv_hash: [u8; 32]) -> ScriptBuf {
     Builder::new()
@@ -56,13 +79,9 @@ pub fn calc_ctv_hash(outputs: &[TxOut], timeout: Option<u32>) -> [u8; 32] {
 }
 
 pub fn create_pool_address(ctv_hashes: Vec<[u8; 32]>) -> Result<TaprootSpendInfo> {
-    let secp = Secp256k1::new();
 
-    let key_pair = Keypair::new(&secp, &mut rand::thread_rng());
-    //TO DO: replace this with a MuSig key for happy spend :)
-    // Random unspendable XOnlyPublicKey provided for internal key. Will replace this with combination of all pool users pubkeys (MuSig)
-    //in a real implentation we would most likely use nostr to communicate the funding PSBT, so you could also use their npubs to create the MuSig key
-    let (unspendable_pubkey, _parity) = XOnlyPublicKey::from_keypair(&key_pair);
+    let secp = &*SECP;
+    let unspendable_pubkey = *UNSPENDABLE_PUBKEY;
 
     let num_scripts = ctv_hashes.len();
     let depths = calculate_depths(num_scripts);
